@@ -1,7 +1,8 @@
 import axios from "axios"
+import { BASE_URL } from "@/lib/config"
+
 
 // Base URL for API calls
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"
 
 // Create axios instance with default config
 const axiosInstance = axios.create({

@@ -17,20 +17,19 @@ import { toast } from "@/components/ui/use-toast"
 import type { InvestmentPlan } from "@/lib/types"
 import { useRouter } from "next/navigation"
 
-
 export default function InvestPage() {
   const router = useRouter()
-  const [amount, setAmount] = useState(0.1)
+  const [amount, setAmount] = useState(0.001)
   const [selectedPlan, setSelectedPlan] = useState<InvestmentPlan | null>(null)
   const [selectedPlanId, setSelectedPlanId] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [plans, setPlans] = useState<InvestmentPlan[]>([])
-  const [bitcoinPrice, setBitcoinPrice] = useState<number | null>(null)
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>(0) // Fixed: removed union with 0
   const [isLoadingPlans, setIsLoadingPlans] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const usdAmount = amount * (bitcoinPrice || 0)
+  const usdAmount = amount * bitcoinPrice
 
   // Fetch investment plans and Bitcoin price on component mount
   useEffect(() => {
@@ -39,6 +38,13 @@ export default function InvestPage() {
         setIsLoadingPlans(true)
         setError(null)
 
+        // Fetch current Bitcoin price
+        const price = await fetchBitcoinPrice()
+        if (!price || price <= 0) {
+          throw new Error("Failed to fetch current Bitcoin price")
+        }
+        setBitcoinPrice(price)
+
         // Fetch plans
         const plansResponse = await fetchInvestmentPlans()
         if (plansResponse.success && plansResponse.data) {
@@ -46,10 +52,10 @@ export default function InvestPage() {
             plansResponse.data.map(plan => ({
               id: plan.id,
               name: plan.name,
-              duration: `${plan.durations_days} days`,
-              roi: plan.roi_percentage,
-              minInvestmentUSD: plan.min_investment_usd,
-              minInvestment: plan.min_investment_usd / bitcoinPrice,
+              duration: `${plan.duration_days} days`,
+              roi: plan.roi_percentage.toString(), // Fixed: ensure it's a string
+              minInvestmentUSD: plan.min_investment_usd || 0, // Allow plans with no minimum
+              minInvestment: (plan.min_investment_usd || 0) / price, // Use price variable instead of bitcoinPrice state
               category: plan.category,
               earlyWithdrawal: plan.early_withdrawal_fee,
               roiPayment: plan.roi_payment,
@@ -58,17 +64,11 @@ export default function InvestPage() {
         } else {
           throw new Error(plansResponse.error || "Failed to fetch plans")
         }
-
-     
-        // Fetch current Bitcoin price
-        const price = await fetchBitcoinPrice()
-        if (!price) {
-          throw new Error("Failed to fetch current Bitcoin price")
-        }
-        setBitcoinPrice(price)
       } catch (err) {
         console.error("Error fetching data:", err)
-        if (String(err).includes("Bitcoin price")) {
+        const errorMessage = err instanceof Error ? err.message : String(err)
+        
+        if (errorMessage.includes("Bitcoin price")) {
           setError("Failed to load current Bitcoin price. Please try again later.")
         } else {
           setError("Failed to load investment plans. Please try again later.")
@@ -91,11 +91,19 @@ export default function InvestPage() {
       return
     }
 
+    if (bitcoinPrice <= 0) {
+      toast({
+        title: "Price Error",
+        description: "Bitcoin price is not available. Please refresh the page.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
     setError(null)
 
     try {
-      // Use the plan ID for the investment
       const amountUsd = amount * bitcoinPrice
 
       const result = await investBitcoin(amountUsd, selectedPlan.id)
@@ -117,18 +125,25 @@ export default function InvestPage() {
       } else {
         throw new Error(result.error)
       }
-    } catch (error: any) {
+    } catch (error: unknown) { // Fixed: better error typing
       console.error("Error investing Bitcoin:", error)
       setLoading(false)
 
       // Extract error message from the error object
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "There was an error processing your investment. Please try again."
-        console.error("Error message:", errorMessage)
+      let errorMessage = "There was an error processing your investment. Please try again."
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'object' && error !== null) {
+        // Handle API error responses
+        const apiError = error as any
+        errorMessage = apiError.response?.data?.message || 
+                     apiError.response?.data?.error || 
+                     apiError.message || 
+                     errorMessage
+      }
 
+      console.error("Error message:", errorMessage)
       setError(errorMessage)
 
       toast({
@@ -141,7 +156,7 @@ export default function InvestPage() {
 
   const expectedReturn = (plan: InvestmentPlan | null) => {
     if (!plan) return 0
-    const roiPercentage = Number.parseFloat(plan.roi) / 100
+    const roiPercentage = parseFloat(plan.roi) / 100 // Fixed: use parseFloat instead of Number.parseFloat
     return amount * (1 + roiPercentage)
   }
 
@@ -149,6 +164,18 @@ export default function InvestPage() {
     setSelectedPlanId(value)
     const plan = plans.find((p) => p.id.toString() === value)
     setSelectedPlan(plan || null)
+    
+    // Remove automatic amount adjustment - let user choose any amount
+    // User will see warning if below minimum but can still select the plan
+  }
+
+  // Helper function to handle amount changes with validation
+  const handleAmountChange = (newAmount: number) => {
+    if (newAmount < 0.001) {
+      setAmount(0.001)
+    } else {
+      setAmount(newAmount)
+    }
   }
 
   // Render loading state
@@ -231,10 +258,10 @@ export default function InvestPage() {
                         id="amount"
                         type="number"
                         value={amount}
-                        onChange={(e) => setAmount(Number(e.target.value))}
+                        onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0.001)}
                         className="pl-10 bg-zinc-700/50 border-zinc-600 focus:border-amber-500"
                         step={0.01}
-                        min={0.01}
+                        min={0.001}
                       />
                     </div>
                   </div>
@@ -243,14 +270,14 @@ export default function InvestPage() {
                     <Label className="text-zinc-400 mb-2 block">Adjust Amount</Label>
                     <Slider
                       value={[amount]}
-                      min={0.01}
+                      min={0.001}
                       max={1}
-                      step={0.01}
-                      onValueChange={(value) => setAmount(value[0])}
+                      step={0.001}
+                      onValueChange={(value) => handleAmountChange(value[0])}
                       className="py-4"
                     />
                     <div className="flex justify-between text-sm text-zinc-500">
-                      <span>0.01 BTC</span>
+                      <span>0.001 BTC</span>
                       <span>1 BTC</span>
                     </div>
                   </div>
@@ -273,12 +300,12 @@ export default function InvestPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-zinc-400">ROI</span>
-                      <span className="font-medium text-amber-500">{selectedPlan.roi}</span>
+                      <span className="font-medium text-amber-500">{selectedPlan.roi}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-zinc-400">Investment Amount</span>
                       <div className="text-right">
-                        <span className="font-medium">{amount} BTC</span>
+                        <span className="font-medium">{amount.toFixed(8)} BTC</span>
                         <div className="text-sm text-zinc-400">≈ ${(amount * bitcoinPrice).toLocaleString()}</div>
                       </div>
                     </div>
@@ -305,17 +332,17 @@ export default function InvestPage() {
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-zinc-400">Minimum Investment</span>
+                      <span className="text-zinc-400">Recommended Minimum</span>
                       <div className="text-right">
                         <span className="font-medium">${selectedPlan.minInvestmentUSD.toLocaleString()}</span>
                         <div className="text-sm text-zinc-400">≈ {selectedPlan.minInvestment.toFixed(8)} BTC</div>
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="flex-col items-stretch">
                     <Button
                       onClick={handleInvest}
-                      disabled={loading || amount < selectedPlan.minInvestment}
+                      disabled={loading}
                       className="w-full bg-amber-500 hover:bg-amber-600 h-12"
                     >
                       {loading ? (
@@ -334,9 +361,9 @@ export default function InvestPage() {
                     </Button>
 
                     {selectedPlan && amount < selectedPlan.minInvestment && (
-                      <p className="text-red-500 text-sm mt-2">
-                        Minimum investment for this plan is ${selectedPlan.minInvestmentUSD.toLocaleString()} (≈{" "}
-                        {selectedPlan.minInvestment.toFixed(8)} BTC)
+                      <p className="text-yellow-500 text-sm mt-2 text-center">
+                        Note: Recommended minimum for this plan is ${selectedPlan.minInvestmentUSD.toLocaleString()} (≈{" "}
+                        {selectedPlan.minInvestment.toFixed(8)} BTC) for optimal returns
                       </p>
                     )}
                   </CardFooter>
@@ -367,232 +394,75 @@ export default function InvestPage() {
                   <TabsTrigger value="long">Long</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="all">
-                  <RadioGroup value={selectedPlanId} onValueChange={handlePlanSelection} className="space-y-4">
-                    {plans.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
-                          selectedPlan?.id === plan.id
-                            ? "border-amber-500 bg-amber-500/10"
-                            : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-                        }`}
-                        onClick={() => handlePlanSelection(plan.id.toString())}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold text-lg">{plan.name}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="outline" className="bg-zinc-700/50">
-                                {plan.duration}
-                              </Badge>
-                              <Badge className="bg-amber-500/80 hover:bg-amber-500">{plan.roi} ROI</Badge>
-                            </div>
-                            <div className="mt-3 text-sm text-zinc-400">
-                              Min. Investment: ${plan.minInvestmentUSD.toLocaleString()}
-                              <span className="block">≈ {plan.minInvestment.toFixed(8)} BTC</span>
-                            </div>
-                            <ul className="mt-3 space-y-1">
-                              <li className="flex items-center text-sm text-zinc-300">
-                                <Check className="w-4 h-4 mr-2 text-green-500" />
-                                {plan.roiPayment} payout
-                              </li>
-                              <li className="flex items-center text-sm text-zinc-300">
-                                <Check className="w-4 h-4 mr-2 text-green-500" />
-                                {plan.earlyWithdrawal}
-                              </li>
-                              <li className="flex items-center text-sm text-zinc-300">
-                                <Check className="w-4 h-4 mr-2 text-green-500" />
-                                Automatic reinvestment option
-                              </li>
-                            </ul>
-                          </div>
-                          <RadioGroupItem value={plan.id.toString()} id={`plan-${plan.id}`} className="sr-only" />
+                {/* Plan selection components */}
+                {["all", "short", "medium", "long"].map((tabValue) => (
+                  <TabsContent key={tabValue} value={tabValue}>
+                    <RadioGroup value={selectedPlanId} onValueChange={handlePlanSelection} className="space-y-4">
+                      {plans
+                        .filter((p) => tabValue === "all" || p.category === tabValue)
+                        .map((plan) => (
                           <div
-                            className={`w-5 h-5 rounded-full border ${
-                              selectedPlan?.id === plan.id ? "border-amber-500 bg-amber-500" : "border-zinc-600"
+                            key={plan.id}
+                            className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
+                              selectedPlan?.id === plan.id
+                                ? "border-amber-500 bg-amber-500/10"
+                                : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
                             }`}
+                            onClick={() => handlePlanSelection(plan.id.toString())}
                           >
-                            {selectedPlan?.id === plan.id && <Check className="w-4 h-4 text-zinc-900" />}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </TabsContent>
-
-                <TabsContent value="short">
-                  <RadioGroup value={selectedPlanId} onValueChange={handlePlanSelection} className="space-y-4">
-                    {plans
-                      .filter((p) => p.category === "short")
-                      .map((plan) => (
-                        <div
-                          key={plan.id}
-                          className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
-                            selectedPlan?.id === plan.id
-                              ? "border-amber-500 bg-amber-500/10"
-                              : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-                          }`}
-                          onClick={() => handlePlanSelection(plan.id.toString())}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold text-lg">{plan.name}</h3>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="bg-zinc-700/50">
-                                  {plan.duration}
-                                </Badge>
-                                <Badge className="bg-amber-500/80 hover:bg-amber-500">{plan.roi} ROI</Badge>
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h3 className="font-bold text-lg">{plan.name}</h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline" className="bg-zinc-700/50">
+                                    {plan.duration}
+                                  </Badge>
+                                  <Badge className="bg-amber-500/80 hover:bg-amber-500">{plan.roi}% ROI</Badge>
+                                </div>
+                                <div className="mt-3 text-sm text-zinc-400">
+                                  {plan.minInvestmentUSD > 0 ? (
+                                    <>
+                                      Recommended Min: ${plan.minInvestmentUSD.toLocaleString()}
+                                      <span className="block">≈ {plan.minInvestment.toFixed(8)} BTC</span>
+                                    </>
+                                  ) : (
+                                    <span className="text-green-400">No minimum investment required</span>
+                                  )}
+                                </div>
+                                <ul className="mt-3 space-y-1">
+                                  <li className="flex items-center text-sm text-zinc-300">
+                                    <Check className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+                                    <span>{plan.roiPayment} payout</span>
+                                  </li>
+                                  <li className="flex items-center text-sm text-zinc-300">
+                                    <Check className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+                                    <span>{plan.earlyWithdrawal}</span>
+                                  </li>
+                                  <li className="flex items-center text-sm text-zinc-300">
+                                    <Check className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+                                    <span>Automatic reinvestment option</span>
+                                  </li>
+                                </ul>
                               </div>
-                              <div className="mt-3 text-sm text-zinc-400">
-                                Min. Investment: ${plan.minInvestmentUSD.toLocaleString()}
-                                <span className="block">≈ {plan.minInvestment.toFixed(8)} BTC</span>
+                              <RadioGroupItem value={plan.id.toString()} id={`plan-${plan.id}`} className="sr-only" />
+                              <div
+                                className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ml-4 ${
+                                  selectedPlan?.id === plan.id ? "border-amber-500 bg-amber-500" : "border-zinc-600"
+                                }`}
+                              >
+                                {selectedPlan?.id === plan.id && <Check className="w-3 h-3 text-zinc-900" />}
                               </div>
-                              <ul className="mt-3 space-y-1">
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  {plan.roiPayment} payout
-                                </li>
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  {plan.earlyWithdrawal}
-                                </li>
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  Automatic reinvestment option
-                                </li>
-                              </ul>
-                            </div>
-                            <RadioGroupItem value={plan.id.toString()} id={`plan-${plan.id}`} className="sr-only" />
-                            <div
-                              className={`w-5 h-5 rounded-full border ${
-                                selectedPlan?.id === plan.id ? "border-amber-500 bg-amber-500" : "border-zinc-600"
-                              }`}
-                            >
-                              {selectedPlan?.id === plan.id && <Check className="w-4 h-4 text-zinc-900" />}
                             </div>
                           </div>
-                        </div>
-                      ))}
-                  </RadioGroup>
-                </TabsContent>
-
-                <TabsContent value="medium">
-                  <RadioGroup value={selectedPlanId} onValueChange={handlePlanSelection} className="space-y-4">
-                    {plans
-                      .filter((p) => p.category === "medium")
-                      .map((plan) => (
-                        <div
-                          key={plan.id}
-                          className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
-                            selectedPlan?.id === plan.id
-                              ? "border-amber-500 bg-amber-500/10"
-                              : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-                          }`}
-                          onClick={() => handlePlanSelection(plan.id.toString())}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold text-lg">{plan.name}</h3>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="bg-zinc-700/50">
-                                  {plan.duration}
-                                </Badge>
-                                <Badge className="bg-amber-500/80 hover:bg-amber-500">{plan.roi} ROI</Badge>
-                              </div>
-                              <div className="mt-3 text-sm text-zinc-400">
-                                Min. Investment: ${plan.minInvestmentUSD.toLocaleString()}
-                                <span className="block">≈ {plan.minInvestment.toFixed(8)} BTC</span>
-                              </div>
-                              <ul className="mt-3 space-y-1">
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  {plan.roiPayment} payout
-                                </li>
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  {plan.earlyWithdrawal}
-                                </li>
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  Automatic reinvestment option
-                                </li>
-                              </ul>
-                            </div>
-                            <RadioGroupItem value={plan.id.toString()} id={`plan-${plan.id}`} className="sr-only" />
-                            <div
-                              className={`w-5 h-5 rounded-full border ${
-                                selectedPlan?.id === plan.id ? "border-amber-500 bg-amber-500" : "border-zinc-600"
-                              }`}
-                            >
-                              {selectedPlan?.id === plan.id && <Check className="w-4 h-4 text-zinc-900" />}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                  </RadioGroup>
-                </TabsContent>
-
-                <TabsContent value="long">
-                  <RadioGroup value={selectedPlanId} onValueChange={handlePlanSelection} className="space-y-4">
-                    {plans
-                      .filter((p) => p.category === "long")
-                      .map((plan) => (
-                        <div
-                          key={plan.id}
-                          className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
-                            selectedPlan?.id === plan.id
-                              ? "border-amber-500 bg-amber-500/10"
-                              : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
-                          }`}
-                          onClick={() => handlePlanSelection(plan.id.toString())}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold text-lg">{plan.name}</h3>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="bg-zinc-700/50">
-                                  {plan.duration}
-                                </Badge>
-                                <Badge className="bg-amber-500/80 hover:bg-amber-500">{plan.roi} ROI</Badge>
-                              </div>
-                              <div className="mt-3 text-sm text-zinc-400">
-                                Min. Investment: ${plan.minInvestmentUSD.toLocaleString()}
-                                <span className="block">≈ {plan.minInvestment.toFixed(8)} BTC</span>
-                              </div>
-                              <ul className="mt-3 space-y-1">
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  {plan.roiPayment} payout
-                                </li>
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  {plan.earlyWithdrawal}
-                                </li>
-                                <li className="flex items-center text-sm text-zinc-300">
-                                  <Check className="w-4 h-4 mr-2 text-green-500" />
-                                  Automatic reinvestment option
-                                </li>
-                              </ul>
-                            </div>
-                            <RadioGroupItem value={plan.id.toString()} id={`plan-${plan.id}`} className="sr-only" />
-                            <div
-                              className={`w-5 h-5 rounded-full border ${
-                                selectedPlan?.id === plan.id ? "border-amber-500 bg-amber-500" : "border-zinc-600"
-                              }`}
-                            >
-                              {selectedPlan?.id === plan.id && <Check className="w-4 h-4 text-zinc-900" />}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                  </RadioGroup>
-                </TabsContent>
+                        ))}
+                    </RadioGroup>
+                  </TabsContent>
+                ))}
               </Tabs>
 
               <div className="mt-6 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
                 <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-amber-500 mt-0.5" />
+                  <Info className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <h3 className="font-medium mb-1">Important Information</h3>
                     <p className="text-sm text-zinc-400">

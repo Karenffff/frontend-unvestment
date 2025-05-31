@@ -38,7 +38,7 @@ export default function BitcoinStats() {
       transition={{ duration: 0.5 }}
       className="p-6 rounded-2xl bg-zinc-800/50 backdrop-blur-sm"
     >
-      <h2 className="text-xl font-bold mb-4">Bitcoin Market Stats</h2>
+      {/* <h2 className="text-xl font-bold mb-4">Bitcoin Market Stats</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 rounded-lg bg-zinc-700/30">
           <p className="text-sm text-zinc-400">Current Price</p>
@@ -66,7 +66,7 @@ export default function BitcoinStats() {
           <p className="text-xl font-bold">${stats.allTimeHigh.toLocaleString()}</p>
           <p className="text-sm text-zinc-500">{stats.athDate}</p>
         </div>
-      </div>
+      </div> */}
     </motion.div>
   )
 }

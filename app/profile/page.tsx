@@ -103,7 +103,7 @@ export default function ProfilePage() {
               <div className="mt-4 p-4 rounded-lg bg-zinc-700/30">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-zinc-400">Member Since</span>
-                  <span>January 2024</span>
+                  <span>May 2025</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Account Status</span>

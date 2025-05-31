@@ -187,8 +187,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="text-lg font-semibold mb-1">Email Us</h3>
                       <p className="text-zinc-400 mb-2">For general inquiries and support</p>
-                      <a href="mailto:support@bitcoinyield.com" className="text-amber-500 hover:text-amber-400">
-                        support@bitcoinyield.com
+                      <a href="mailto:support@newbethelfcreditunion.com" className="text-amber-500 hover:text-amber-400">
+                        support@newbethelfcreditunion.com
                       </a>
                     </div>
                   </div>

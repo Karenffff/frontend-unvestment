@@ -92,15 +92,7 @@ export default function DepositPage() {
     } else if (paymentMethod === "ethereum") {
       setNetworkOptions([
         { value: "ethereum", label: "Ethereum Mainnet" },
-        { value: "arbitrum", label: "Arbitrum" },
-        { value: "optimism", label: "Optimism" },
-      ])
-      setPaymentNetwork("ethereum")
-    } else if (paymentMethod === "usdc") {
-      setNetworkOptions([
-        { value: "ethereum", label: "Ethereum (ERC-20)" },
-        { value: "polygon", label: "Polygon" },
-        { value: "solana", label: "Solana" },
+
       ])
       setPaymentNetwork("ethereum")
     } else if (paymentMethod === "usdt") {
@@ -259,7 +251,6 @@ export default function DepositPage() {
                         <SelectContent>
                           <SelectItem value="bitcoin">Bitcoin (BTC)</SelectItem>
                           <SelectItem value="ethereum">Ethereum (ETH)</SelectItem>
-                          <SelectItem value="usdc">USD Coin (USDC)</SelectItem>
                           <SelectItem value="usdt">Tether (USDT)</SelectItem>
                         </SelectContent>
                       </Select>

@@ -469,30 +469,23 @@ export async function fetchWalletAddress(currency: string, network: string): Pro
     // Return fallback addresses
     if (currency === "bitcoin") {
       if (network === "btc-mainnet") {
-        return "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-      } else {
-        return "lnbc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+        return "bc1q084g99n4kvlf7nyt63mvqzqxn35ppaf5ku68vv"
       }
     } else if (currency === "ethereum") {
-      return "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-    } else if (currency === "usdc") {
+      return "0x220E799c62a51B4bDC5353A151033D0b01AcfE39"
+    }
+     else if (currency === "usdt") {
       if (network === "ethereum") {
-        return "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-      } else {
-        return "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
-      }
-    } else if (currency === "usdt") {
-      if (network === "ethereum") {
-        return "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+        return "0x220E799c62a51B4bDC5353A151033D0b01AcfE39"
       } else if (network === "tron") {
-        return "TKHuVq1oKVruCGLvqVexFs6dawKv6fQgFs"
+        return "TE9ujfkKwy8o7e47Aa3G8Z9KwwMUH5Pmet"
       } else {
-        return "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+        return "0x220E799c62a51B4bDC5353A151033D0b01AcfE39"
       }
     }
 
     // Default fallback
-    return "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    return "bc1q084g99n4kvlf7nyt63mvqzqxn35ppaf5ku68vv"
   }
 }
 
@@ -636,7 +629,7 @@ export async function fetchInvestmentPlans(): Promise<{
   data?: {
     id: number;
     name: string;
-    durations_days: number;
+    duration_days: number;
     roi_percentage: string;
     min_investment_usd: number;
     category: string;

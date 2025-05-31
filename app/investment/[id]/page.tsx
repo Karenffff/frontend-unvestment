@@ -20,7 +20,7 @@ import { Progress } from "@/components/ui/progress"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { fetchUserInvestments } from "@/lib/api"
+import { fetchUserInvestments, fetchBitcoinPrice } from "@/lib/api"
 
 export default function InvestmentDetailsPage() {
   const params = useParams()
@@ -30,26 +30,34 @@ export default function InvestmentDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [withdrawLoading, setWithdrawLoading] = useState(false)
   const [withdrawSuccess, setWithdrawSuccess] = useState(false)
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>(0)
+
 
   useEffect(() => {
-    const loadInvestment = async () => {
-      try {
-        const investments = await fetchUserInvestments()
-        const found = investments.find((inv) => inv.id.toString() === id)
+  const loadInvestment = async () => {
+    try {
+      const [investments, livePrice] = await Promise.all([
+        fetchUserInvestments(),
+        fetchBitcoinPrice(),
+      ])
 
-        if (found) {
-          setInvestment(found)
-        }
+      const found = investments.find((inv: any) => inv.id.toString() === id)
 
-        setLoading(false)
-      } catch (error) {
-        console.error("Error loading investment:", error)
-        setLoading(false)
+      if (found) {
+        setInvestment(found)
       }
-    }
 
-    loadInvestment()
-  }, [id])
+      setBitcoinPrice(livePrice)
+      console.log("Bitcoin Price:", livePrice)
+      setLoading(false)
+    } catch (error) {
+      console.error("Error loading investment or BTC price:", error)
+      setLoading(false)
+    }
+  }
+
+  loadInvestment()
+}, [id])
 
   const handleEarlyWithdrawal = async () => {
     setWithdrawLoading(true)
@@ -71,7 +79,6 @@ export default function InvestmentDetailsPage() {
     }
   }
 
-  const bitcoinPrice = 65432.1 // Current BTC price in USD
 
   if (loading) {
     return (
@@ -236,7 +243,7 @@ export default function InvestmentDetailsPage() {
                   ) : (
                     <>
                       <AlertTriangle className="w-4 h-4 mr-2 text-amber-500" />
-                      Request Early Withdrawal (Will incur{" "}
+                      {/* Request Early Withdrawal (Will incur{" "}
                       {investment.planName.includes("Starter")
                         ? "1%"
                         : investment.planName.includes("Growth")
@@ -246,7 +253,7 @@ export default function InvestmentDetailsPage() {
                             : investment.planName.includes("Wealth")
                               ? "4%"
                               : "5%"}{" "}
-                      fee)
+                      fee) */}
                     </>
                   )}
                 </Button>

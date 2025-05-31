@@ -118,7 +118,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Flexible Terms</h3>
                   <p className="text-zinc-300">
-                    Choose from various investment durations to match your financial goals, from 7 days to 1 year.
+                    Choose from various investment durations to match your financial goals, from 24 hour to 1 year.
                   </p>
                 </div>
               </div>

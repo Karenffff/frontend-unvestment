@@ -74,11 +74,11 @@ export default function SiteFooter() {
                   Withdraw
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/referral" className="hover:text-amber-500">
                   Referral Program
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -113,7 +113,7 @@ export default function SiteFooter() {
             </ul>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="mb-4 text-sm font-semibold tracking-wider text-white uppercase">Legal</h3>
             <ul className="space-y-2">
               <li>
@@ -142,7 +142,7 @@ export default function SiteFooter() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
         <div className="pt-8 mt-8 border-t border-zinc-800">

@@ -44,7 +44,7 @@ export default function InvestmentPlans({ filter = "all" }) {
           return {
             id: plan.id,
             name: plan.name,
-            duration: `${plan.durations_days} days`,
+            duration: `${plan.duration_days} days`,
             roi: plan.roi_percentage,
             minInvestment: btcEquivalent,
             minInvestmentUSD: usd,
@@ -92,7 +92,7 @@ export default function InvestmentPlans({ filter = "all" }) {
                 </Badge>
               </div>
             </div>
-            <Badge className="bg-amber-500 hover:bg-amber-500 text-lg px-3 py-1.5">{plan.roi} ROI</Badge>
+            <Badge className="bg-amber-500 hover:bg-amber-500 text-lg px-3 py-1.5">{plan.roi}% ROI</Badge>
           </div>
 
           <div className="space-y-3 mb-6">

@@ -248,7 +248,7 @@ export async function fetchUserInvestments(): Promise<Investment[]> {
       }
 
       // Calculate current earnings based on progress
-      const totalEarnings = item.expected_return - item.amount_usd
+      const totalEarnings = item.expected_return 
       const currentEarnings = (totalEarnings * progressPercentage) / 100
 
       // Format dates to be more readable

@@ -231,9 +231,7 @@ export default function DashboardPage() {
                                     <p className="text-zinc-400">Expected Return</p>
                                     <p className="font-bold text-green-500">
                                       {investment.expectedReturn} BTC
-                                      <span className="block text-sm text-green-400">
-                                        ≈ ${(investment.expectedReturn * 65432.1).toLocaleString()}
-                                      </span>
+                                     
                                     </p>
                                   </div>
                                 </div>
@@ -251,7 +249,7 @@ export default function DashboardPage() {
                                 </div>
 
                                 <div className="mt-4 pt-4 border-t border-zinc-700 flex justify-between items-center">
-                                  <div>
+                                  {/* <div>
                                     <p className="text-zinc-400 text-sm">Current Earnings</p>
                                     <p className="font-medium text-green-500">
                                       {investment.currentEarnings} BTC
@@ -259,7 +257,7 @@ export default function DashboardPage() {
                                         ≈ ${(investment.currentEarnings * 65432.1).toLocaleString()}
                                       </span>
                                     </p>
-                                  </div>
+                                  </div> */}
                                   <Link href={`/investment/${investment.id}`}>
                                     <Button variant="outline" size="sm" className="border-zinc-700">
                                       View Details

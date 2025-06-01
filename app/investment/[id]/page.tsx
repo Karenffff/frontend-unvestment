@@ -213,9 +213,9 @@ export default function InvestmentDetailsPage() {
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Profit</span>
                   <span className="font-medium text-green-500">
-                    {(investment.expectedReturn - investment.amount).toFixed(8)} BTC
+                    {(investment.expectedReturn).toFixed(8)} BTC
                     <span className="block text-xs text-green-400 text-right">
-                      ≈ ${((investment.expectedReturn - investment.amount) * bitcoinPrice).toLocaleString()}
+                      ≈ ${((investment.expectedReturn ) * bitcoinPrice).toLocaleString()}
                     </span>
                   </span>
                 </div>

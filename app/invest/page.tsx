@@ -19,17 +19,20 @@ import { useRouter } from "next/navigation"
 
 export default function InvestPage() {
   const router = useRouter()
-  const [amount, setAmount] = useState(0.001)
+  const [amount, setAmount] = useState(0.001) // Will be updated when Bitcoin price loads
   const [selectedPlan, setSelectedPlan] = useState<InvestmentPlan | null>(null)
   const [selectedPlanId, setSelectedPlanId] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [plans, setPlans] = useState<InvestmentPlan[]>([])
-  const [bitcoinPrice, setBitcoinPrice] = useState<number>(0) // Fixed: removed union with 0
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>(0)
   const [isLoadingPlans, setIsLoadingPlans] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const usdAmount = amount * bitcoinPrice
+
+  // Check if current amount meets minimum investment requirement
+  const isAmountBelowMinimum = selectedPlan && selectedPlan.minInvestmentUSD > 0 && usdAmount < selectedPlan.minInvestmentUSD
 
   // Fetch investment plans and Bitcoin price on component mount
   useEffect(() => {
@@ -45,6 +48,10 @@ export default function InvestPage() {
         }
         setBitcoinPrice(price)
 
+        // Set default amount to $100 worth of BTC
+        const defaultAmountInBTC = 100 / price
+        setAmount(defaultAmountInBTC)
+
         // Fetch plans
         const plansResponse = await fetchInvestmentPlans()
         if (plansResponse.success && plansResponse.data) {
@@ -53,9 +60,9 @@ export default function InvestPage() {
               id: plan.id,
               name: plan.name,
               duration: `${plan.duration_days} days`,
-              roi: plan.roi_percentage.toString(), // Fixed: ensure it's a string
-              minInvestmentUSD: plan.min_investment_usd || 0, // Allow plans with no minimum
-              minInvestment: (plan.min_investment_usd || 0) / price, // Use price variable instead of bitcoinPrice state
+              roi: plan.roi_percentage.toString(),
+              minInvestmentUSD: plan.min_investment_usd || 0,
+              minInvestment: (plan.min_investment_usd || 0) / price,
               category: plan.category,
               earlyWithdrawal: plan.early_withdrawal_fee,
               roiPayment: plan.roi_payment,
@@ -100,6 +107,16 @@ export default function InvestPage() {
       return
     }
 
+    // Check minimum investment requirement
+    if (isAmountBelowMinimum) {
+      toast({
+        title: "Minimum Investment Required",
+        description: `Your investment amount ($${usdAmount.toLocaleString()}) is below the minimum required for this plan ($${selectedPlan.minInvestmentUSD.toLocaleString()}). Please increase your investment amount.`,
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -125,7 +142,7 @@ export default function InvestPage() {
       } else {
         throw new Error(result.error)
       }
-    } catch (error: unknown) { // Fixed: better error typing
+    } catch (error: unknown) {
       console.error("Error investing Bitcoin:", error)
       setLoading(false)
 
@@ -156,7 +173,7 @@ export default function InvestPage() {
 
   const expectedReturn = (plan: InvestmentPlan | null) => {
     if (!plan) return 0
-    const roiPercentage = parseFloat(plan.roi) / 100 // Fixed: use parseFloat instead of Number.parseFloat
+    const roiPercentage = parseFloat(plan.roi) / 100
     return amount * (1 + roiPercentage)
   }
 
@@ -164,15 +181,13 @@ export default function InvestPage() {
     setSelectedPlanId(value)
     const plan = plans.find((p) => p.id.toString() === value)
     setSelectedPlan(plan || null)
-    
-    // Remove automatic amount adjustment - let user choose any amount
-    // User will see warning if below minimum but can still select the plan
   }
 
   // Helper function to handle amount changes with validation
   const handleAmountChange = (newAmount: number) => {
-    if (newAmount < 0.001) {
-      setAmount(0.001)
+    const minBtcAmount = 10 / bitcoinPrice // $10 minimum in BTC
+    if (newAmount < minBtcAmount) {
+      setAmount(minBtcAmount)
     } else {
       setAmount(newAmount)
     }
@@ -258,27 +273,41 @@ export default function InvestPage() {
                         id="amount"
                         type="number"
                         value={amount}
-                        onChange={(e) => handleAmountChange(parseFloat(e.target.value) || 0.001)}
-                        className="pl-10 bg-zinc-700/50 border-zinc-600 focus:border-amber-500"
-                        step={0.01}
-                        min={0.001}
+                        onChange={(e) => handleAmountChange(parseFloat(e.target.value) || (10 / bitcoinPrice))}
+                        className={`pl-10 bg-zinc-700/50 border-zinc-600 focus:border-amber-500 ${
+                          isAmountBelowMinimum ? 'border-red-500 focus:border-red-500' : ''
+                        }`}
+                        step={0.001}
+                        min={10 / bitcoinPrice}
                       />
                     </div>
+                    {/* Show minimum investment error */}
+                    {isAmountBelowMinimum && (
+                      <div className="mt-2 p-3 rounded-lg bg-red-500/20 border border-red-500/50">
+                        <p className="text-red-400 text-sm font-medium">
+                          ⚠️ Minimum investment required: ${selectedPlan.minInvestmentUSD.toLocaleString()} 
+                          (≈ {selectedPlan.minInvestment.toFixed(8)} BTC)
+                        </p>
+                        <p className="text-red-300 text-xs mt-1">
+                          Your current amount: ${usdAmount.toLocaleString()} is below the minimum for this plan.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
                     <Label className="text-zinc-400 mb-2 block">Adjust Amount</Label>
                     <Slider
                       value={[amount]}
-                      min={0.001}
-                      max={1}
+                      min={10 / bitcoinPrice} // $10 minimum
+                      max={10000 / bitcoinPrice} // $10,000 maximum
                       step={0.001}
                       onValueChange={(value) => handleAmountChange(value[0])}
                       className="py-4"
                     />
                     <div className="flex justify-between text-sm text-zinc-500">
-                      <span>0.001 BTC</span>
-                      <span>1 BTC</span>
+                      <span>$10</span>
+                      <span>$10,000</span>
                     </div>
                   </div>
                 </CardContent>
@@ -332,7 +361,7 @@ export default function InvestPage() {
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-zinc-400">Recommended Minimum</span>
+                      <span className="text-zinc-400">Required Minimum</span>
                       <div className="text-right">
                         <span className="font-medium">${selectedPlan.minInvestmentUSD.toLocaleString()}</span>
                         <div className="text-sm text-zinc-400">≈ {selectedPlan.minInvestment.toFixed(8)} BTC</div>
@@ -342,8 +371,12 @@ export default function InvestPage() {
                   <CardFooter className="flex-col items-stretch">
                     <Button
                       onClick={handleInvest}
-                      disabled={loading}
-                      className="w-full bg-amber-500 hover:bg-amber-600 h-12"
+                      disabled={loading || isAmountBelowMinimum}
+                      className={`w-full h-12 ${
+                        isAmountBelowMinimum 
+                          ? 'bg-red-500/50 hover:bg-red-500/50 cursor-not-allowed' 
+                          : 'bg-amber-500 hover:bg-amber-600'
+                      }`}
                     >
                       {loading ? (
                         <>
@@ -355,16 +388,22 @@ export default function InvestPage() {
                           <Check className="w-4 h-4 mr-2" />
                           Investment Complete!
                         </>
+                      ) : isAmountBelowMinimum ? (
+                        "Minimum Investment Required"
                       ) : (
                         "Confirm Investment"
                       )}
                     </Button>
 
-                    {selectedPlan && amount < selectedPlan.minInvestment && (
-                      <p className="text-yellow-500 text-sm mt-2 text-center">
-                        Note: Recommended minimum for this plan is ${selectedPlan.minInvestmentUSD.toLocaleString()} (≈{" "}
-                        {selectedPlan.minInvestment.toFixed(8)} BTC) for optimal returns
-                      </p>
+                    {isAmountBelowMinimum && (
+                      <div className="mt-3 p-3 rounded-lg bg-red-500/20 border border-red-500/50">
+                        <p className="text-red-400 text-sm font-medium text-center">
+                          ❌ Cannot proceed: Investment amount is below minimum requirement
+                        </p>
+                        <p className="text-red-300 text-xs mt-1 text-center">
+                          Increase your investment to at least ${selectedPlan.minInvestmentUSD.toLocaleString()} to continue
+                        </p>
+                      </div>
                     )}
                   </CardFooter>
                 </Card>
@@ -422,7 +461,7 @@ export default function InvestPage() {
                                 <div className="mt-3 text-sm text-zinc-400">
                                   {plan.minInvestmentUSD > 0 ? (
                                     <>
-                                      Recommended Min: ${plan.minInvestmentUSD.toLocaleString()}
+                                      <span className="font-medium text-red-400">Required Min:</span> ${plan.minInvestmentUSD.toLocaleString()}
                                       <span className="block">≈ {plan.minInvestment.toFixed(8)} BTC</span>
                                     </>
                                   ) : (

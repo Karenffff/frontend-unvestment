@@ -647,16 +647,28 @@ export async function fetchInvestmentPlans(): Promise<{
   }
 }
 
-// Add a new function for withdrawing Bitcoin
-export async function withdrawBitcoin(withdrawalData: WithdrawalRequest): Promise<ApiResult<any>> {
+// Updated function for withdrawing funds with multiple payout methods
+export async function withdrawFunds(withdrawalData: WithdrawalRequest): Promise<ApiResult<any>> {
   try {
     console.log("Withdrawal request:", withdrawalData)
 
-    const response = await axiosInstance.post("/withdrawals/", {
-      amount_usd: withdrawalData.amountUsd,
-      address: withdrawalData.bitcoinAddress,
-      network: withdrawalData.network,
-    })
+      // Prepare the request payload based on payout method
+    const payload: any = {
+      amount_usd: withdrawalData.amount,
+      payout_method: withdrawalData.payoutMethod,
+    }
+
+    // Add method-specific fields
+    if (withdrawalData.payoutMethod === "bitcoin") {
+      payload.address = withdrawalData.bitcoinAddress
+      payload.network = withdrawalData.network
+    } else if (withdrawalData.payoutMethod === "cashapp") {
+      payload.cashapp_tag = withdrawalData.cashappTag
+    } else if (withdrawalData.payoutMethod === "paypal") {
+      payload.paypal_email = withdrawalData.paypalEmail
+    }
+
+    const response = await axiosInstance.post("/withdrawals/", payload)
 
     console.log("Withdrawal response:", response.data)
 
@@ -673,6 +685,17 @@ export async function withdrawBitcoin(withdrawalData: WithdrawalRequest): Promis
       error: error?.response?.data?.message || "Failed to process withdrawal",
     }
   }
+}
+
+
+// Keep the old withdrawBitcoin function for backward compatibility
+export async function withdrawBitcoin(withdrawalData: any): Promise<ApiResult<any>> {
+  return withdrawFunds({
+    amount: withdrawalData.amountUsd,
+    payoutMethod: "bitcoin",
+    bitcoinAddress: withdrawalData.bitcoinAddress,
+    network: withdrawalData.network,
+  })
 }
 
 // Add a function to fetch recent withdrawals

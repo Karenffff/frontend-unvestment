@@ -131,18 +131,23 @@ export interface AnalyticsData {
 // Withdrawal request
 export interface WithdrawalRequest {
   amount: number
-  amountUsd: number
-  bitcoinAddress: string
-  network: string
+  payoutMethod: "bitcoin" | "cashapp" | "paypal"
+  bitcoinAddress?: string
+  network?: string
+  cashappTag?: string
+  paypalEmail?: string
 }
 
 // Withdrawal response
 export interface Withdrawal {
   id: string | number
-  amount: number
-  amountUsd: number
-  address: string
-  network: string
+  amount?: number
+  amountUsd?: number
+  address?: string
+  network?: string
+  payoutMethod?: string
+  cashappTag?: string
+  paypalEmail?: string
   status: string
   createdAt: string
   completedAt?: string

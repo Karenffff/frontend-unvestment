@@ -301,16 +301,19 @@ export async function investBitcoin(amount: number, planId: number): Promise<Api
       plan_id: planId,
       amount_usd: amount,
     })
-   console.log("Investment Response:", response.data)
     return {
       success: true,
       data: response.data.data,
     }
   } catch (error: any) {
     console.error("Error making investment:", error)
+    const message = error?.response?.data?.message
+                 || error?.response?.data?.detail
+                 || error?.response?.data?.error
+                 || "Failed to make investment";
     return {
       success: false,
-      error: error?.response.data?.message || "Failed to make investment",
+      error: message
     }
   }
 }
@@ -568,19 +571,23 @@ export async function fetchAnalyticsData(timeframe: string): Promise<AnalyticsDa
 // Request password reset
 export async function requestPasswordReset(email: string): Promise<ApiResult<void>> {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
+    const response =  await axiosInstance.post("/auth/password-reset/", {
       email: email,
     })
 
     return {
       success: true,
-      data: undefined,
+      data: response.data?.message || undefined,
     }
   } catch (error: any) {
     console.error("Error requesting password reset:", error)
+    const message = error?.response?.data?.message
+                 || error?.response?.data?.detail
+                 || error?.response?.data?.error
+                 || "Failed to request password reset";
     return {
       success: false,
-      error: error?.response?.data?.message || "Failed to request password reset",
+      error: message
     }
   }
 }
@@ -602,6 +609,51 @@ export async function resetPassword(token: string, newPassword: string): Promise
     return {
       success: false,
       error: error?.response?.data?.message || "Failed to reset password",
+    }
+  }
+}
+
+// Reset password with UID and token
+export async function resetPasswordWithUidToken(
+  uid: string,
+  token: string,
+  newPassword: string,
+): Promise<ApiResult<void>> {
+  try {
+    const response = await axiosInstance.post("/password-reset/confirm/", {
+      uid: uid,
+      token: token,
+      new_password: newPassword,
+    })
+
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error: any) {
+    console.error("Error resetting password:", error)
+    return {
+      success: false,
+      error: error?.response?.data?.message || "Failed to reset password",
+    }
+  }
+}
+
+// Verify email with UID and token
+export async function verifyEmail(uid: string, token: string): Promise<ApiResult<void>> {
+  try {
+      const response = await axiosInstance.get(`/auth/email-verify/${uid}/${token}/`);
+
+
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error: any) {
+    console.error("Error verifying email:", error)
+    return {
+      success: false,
+      error: error?.response?.data?.message || "Failed to verify email",
     }
   }
 }

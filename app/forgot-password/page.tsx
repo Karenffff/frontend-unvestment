@@ -10,8 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
+import { requestPasswordReset } from "@/lib/api"
 import SiteHeader from "@/components/site-header"
 import SiteFooter from "@/components/site-footer"
+
+
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -26,18 +29,16 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      // Simulate API call to request password reset
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Generate a random UUID for the reset token
-      const resetToken = crypto.randomUUID()
-
-      // In a real app, this would send an email with a link containing the token
-      console.log(`Reset token: ${resetToken}`)
-
-      setSuccess(true)
+      // Use the API function to request password reset
+      const result = await requestPasswordReset(email)
+     
+      if (result.success) {
+        setSuccess(true)
+      } else {
+        setError(result.error || "Failed to send reset link. Please try again.")
+      }
     } catch (err) {
-      setError("Failed to send reset link. Please try again.")
+      setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }

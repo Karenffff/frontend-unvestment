@@ -13,6 +13,22 @@ import DashboardAnalytics from "@/components/dashboard-analytics"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { WalletStats } from "@/lib/types"
 
+// Define the Investment type if not already imported
+type Investment = {
+  id: string
+  planName: string
+  amount: number
+  amountUsd?: number
+  roi: string
+  duration: string
+  expectedReturn: number
+  currentEarnings: number
+  progressPercentage: number
+  startDate: string
+  endDate: string
+  status: "active" | "completed"
+}
+
 export default function DashboardPage() {
   const [investments, setInvestments] = useState<Investment[]>([])
  

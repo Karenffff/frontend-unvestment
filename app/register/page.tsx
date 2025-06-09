@@ -45,20 +45,21 @@ export default function RegisterPage() {
     setIsLoading(true)
   
     try {
-      const result = await register(name, email, password)
-  
-      if (result.success) {
-        router.push("/dashboard")
+      const success = await register(name, email, password)
+
+      if (success) {
+        // Redirect to registration success modal with email parameter
+        router.push(`/registration-success?email=${encodeURIComponent(email)}`)
       } else {
-        setError(result.error || "Registration failed. Please try again.")
+        setError("Registration failed. Please try again.")
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.")
+    } catch (err: any) {
+      // Display the specific error message from the API if available
+      setError(err.message || "An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
-  
 
   return (
     <>
@@ -181,6 +182,12 @@ export default function RegisterPage() {
                 </Link>
               </div>
             </form>
+            <div className="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <p className="text-sm text-amber-200 text-center">
+                📧 After registration, we'll send you a verification email. Please click the link in the email to
+                activate your account.
+              </p>
+            </div>
           </motion.div>
         </div>
       </main>

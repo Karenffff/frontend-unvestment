@@ -17,11 +17,9 @@ type AuthContextType = {
   user: User | null
   isLoading: boolean
   isAuthenticated: boolean
-  needsEmailVerification: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
-  checkEmailVerification: () => void
 }
 
 // Create context with default values
@@ -29,11 +27,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   isAuthenticated: false,
-  needsEmailVerification: false,
   login: async () => ({ success: false }),
   register: async () => ({ success: false }),
   logout: () => {},
-  checkEmailVerification: () => {},
 })
 
 type AuthProviderProps = {
@@ -44,7 +40,6 @@ type AuthProviderProps = {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [needsEmailVerification, setNeedsEmailVerification] = useState(false)
 
 
   useEffect(() => {
@@ -85,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return { success: true }
     } catch (error: any) {
-      console.error("Registration error:", error)
+      console.error("login error:", error)
       const errorData = error.response?.data
       const errorMessage = errorData
         ? Object.entries(errorData).map(([_, messages]) => (messages as string[]).join(", ")).join(" | ")
@@ -107,13 +102,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // If we get a 201 Created status, the registration was successful
       // but the user needs to verify their email
-      if (response.status === 201) {
-        // We don't store any user data or token yet since the user needs to verify their email
-        setNeedsEmailVerification(true)
-        return { success: true }
-      }
 
-      return { success: false }
+
+      return { success: true }
+  
     } catch (error: any) {
       console.error("Registration error:", error)
 
@@ -122,16 +114,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { success: false, error: errorMessage }
     } finally {
       setIsLoading(false)
-    }
-  }
-  const checkEmailVerification = () => {
-    const storedUser = localStorage.getItem("bitcoinyield_user")
-    if (storedUser) {
-      const userData = JSON.parse(storedUser)
-      if (userData.isEmailVerified) {
-        setNeedsEmailVerification(false)
-        setUser(userData)
-      }
     }
   }
 
@@ -148,11 +130,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
         isLoading,
         isAuthenticated: !!user,
-        needsEmailVerification,
         login,
         register,
         logout,
-        checkEmailVerification,
 
       }}
     >

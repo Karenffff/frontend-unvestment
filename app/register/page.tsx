@@ -45,13 +45,13 @@ export default function RegisterPage() {
     setIsLoading(true)
   
     try {
-      const success = await register(name, email, password)
+      const { success, error } = await register(name, email, password);
 
       if (success) {
         // Redirect to registration success modal with email parameter
         router.push(`/registration-success?email=${encodeURIComponent(email)}`)
       } else {
-        setError("Registration failed. Please try again.")
+        setError(error || "Registration failed. Please try again.")
       }
     } catch (err: any) {
       // Display the specific error message from the API if available

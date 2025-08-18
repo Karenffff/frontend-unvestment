@@ -101,7 +101,7 @@ export default function VerifyEmailWithTokenPage() {
                 </div>
                 <h2 className="text-xl font-bold mb-2 text-green-400">Email Verified Successfully!</h2>
                 <p className="text-zinc-400 mb-6">
-                  Your email has been verified. You can now log in to your BitcoinYield account and start investing.
+                  Your email has been verified. You can now log in to your MarkInvestment account and start investing.
                 </p>
                 <div className="space-y-3">
                   <Button

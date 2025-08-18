@@ -80,7 +80,7 @@ export default function Home() {
         <section className="py-20 bg-zinc-900/50">
           <div className="container px-4 mx-auto max-w-7xl">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose BitcoinYield</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose MarkInvestment</h2>
               <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
                 Our platform offers unique advantages that make Bitcoin investing simple, secure, and profitable.
               </p>

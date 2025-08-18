@@ -25,7 +25,7 @@ export default function SiteHeader() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <Bitcoin className="w-8 h-8 text-amber-500" />
-              <h1 className="text-2xl font-bold text-white">BitcoinYield</h1>
+              <h1 className="text-2xl font-bold text-white">MarkInvestment</h1>
             </Link>
             <nav className="hidden ml-10 space-x-8 md:flex">
               <Link href="/invest" className="text-zinc-300 hover:text-white">

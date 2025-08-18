@@ -126,7 +126,7 @@ export default function RegistrationSuccessPage() {
               <div className="w-6 h-6 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-bold">
                 2
               </div>
-              <span>Look for an email from BitcoinYield</span>
+              <span>Look for an email from MarkInvestment</span>
             </div>
             <div className="flex items-center space-x-3 text-sm text-zinc-300">
               <div className="w-6 h-6 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-bold">

@@ -62,7 +62,7 @@ export default function LoginPage() {
             <div className="flex flex-col items-center mb-8">
               <Bitcoin className="w-12 h-12 mb-4 text-amber-500" />
               <h1 className="text-3xl font-bold">Welcome Back</h1>
-              <p className="mt-2 text-zinc-400">Log in to your BitcoinYield account</p>
+              <p className="mt-2 text-zinc-400">Log in to your MarkInvestment account</p>
             </div>
 
             {error && <div className="p-3 mb-6 text-sm rounded-md bg-red-500/20 text-red-200">{error}</div>}

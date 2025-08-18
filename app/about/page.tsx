@@ -13,7 +13,7 @@ export default function AboutPage() {
           <div className="container px-4 mx-auto max-w-7xl relative z-10">
             <div className="max-w-3xl">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                About <span className="text-amber-500">BitcoinYield</span>
+                About <span className="text-amber-500">MarkInvestment</span>
               </h1>
               <p className="text-xl text-zinc-400 mb-8">
                 We're on a mission to make Bitcoin investing accessible, secure, and profitable for everyone. Learn about
@@ -30,7 +30,7 @@ export default function AboutPage() {
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
                 <p className="text-lg text-zinc-300 mb-4">
-                  BitcoinYield was founded in 2020 by a team of cryptocurrency experts and financial professionals who
+                  MarkInvestment was founded in 2020 by a team of cryptocurrency experts and financial professionals who
                   saw the potential of Bitcoin as a long-term investment asset.
                 </p>
                 <p className="text-lg text-zinc-300 mb-4">
@@ -46,7 +46,7 @@ export default function AboutPage() {
               <div className="rounded-2xl overflow-hidden">
                 <img
                   src="/placeholder.svg?height=600&width=800"
-                  alt="BitcoinYield Team"
+                  alt="MarkIvestment Team"
                   className="w-full h-auto"
                 />
               </div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Core Values</h2>
               <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-                These principles guide everything we do at BitcoinYield
+                These principles guide everything we do at MarkInvestment
               </p>
             </div>
 

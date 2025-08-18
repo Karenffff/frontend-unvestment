@@ -9,7 +9,7 @@ export default function SiteFooter() {
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-4">
               <Bitcoin className="w-6 h-6 text-amber-500" />
-              <h2 className="text-xl font-bold text-white">BitcoinYield</h2>
+              <h2 className="text-xl font-bold text-white">MarkInvestment</h2>
             </div>
             <p className="mb-4">
               The premier platform for Bitcoin investments with guaranteed returns. Grow your Bitcoin with our secure
@@ -146,7 +146,7 @@ export default function SiteFooter() {
         </div>
 
         <div className="pt-8 mt-8 border-t border-zinc-800">
-          <p className="text-sm text-center">&copy; {new Date().getFullYear()} BitcoinYield. All rights reserved.</p>
+          <p className="text-sm text-center">&copy; {new Date().getFullYear()} MarkInvestment. All rights reserved.</p>
           <p className="mt-2 text-xs text-center text-zinc-500">
             Cryptocurrency investments are subject to market risks. Past performance is not indicative of future
             results. Please invest responsibly.

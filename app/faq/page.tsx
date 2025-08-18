@@ -21,21 +21,21 @@ const categories = ["General", "Investments", "Security", "Payments", "Account"]
 // FAQ data
 const faqData: FAQItem[] = [
   {
-    question: "What is BitcoinYield?",
+    question: "What is MarkInvestment?",
     answer:
-      "BitcoinYield is a platform that allows you to invest your Bitcoin and earn guaranteed returns. We offer various investment plans with different durations and ROI rates, providing a secure and transparent way to grow your cryptocurrency assets.",
+      "MarkInvestment is a platform that allows you to invest your Bitcoin and earn guaranteed returns. We offer various investment plans with different durations and ROI rates, providing a secure and transparent way to grow your cryptocurrency assets.",
     category: "General",
   },
   {
-    question: "How does BitcoinYield guarantee returns?",
+    question: "How does MarkInvestment guarantee returns?",
     answer:
       "We use a combination of strategic Bitcoin trading, lending, and staking to generate consistent returns. Our diversified approach and risk management strategies allow us to guarantee fixed ROIs regardless of market conditions. We maintain substantial reserves to ensure all returns are paid as promised.",
     category: "General",
   },
   {
-    question: "Is BitcoinYield regulated?",
+    question: "Is MarkInvestment regulated?",
     answer:
-      "BitcoinYield operates in compliance with applicable regulations in the jurisdictions where we offer our services. We implement strict KYC (Know Your Customer) and AML (Anti-Money Laundering) procedures to ensure a secure and compliant platform.",
+      "MarkInvestment operates in compliance with applicable regulations in the jurisdictions where we offer our services. We implement strict KYC (Know Your Customer) and AML (Anti-Money Laundering) procedures to ensure a secure and compliant platform.",
     category: "General",
   },
   {

@@ -75,7 +75,7 @@ export default function RegisterPage() {
             <div className="flex flex-col items-center mb-8">
               <Bitcoin className="w-12 h-12 mb-4 text-amber-500" />
               <h1 className="text-3xl font-bold">Create Account</h1>
-              <p className="mt-2 text-zinc-400">Join BitcoinYield and start investing</p>
+              <p className="mt-2 text-zinc-400">Join MarkInvestment and start investing</p>
             </div>
 
             {error && <div className="p-3 mb-6 text-sm rounded-md bg-red-500/20 text-red-200">{error}</div>}

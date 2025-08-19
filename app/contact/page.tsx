@@ -208,7 +208,7 @@ export default function ContactPage() {
                       <h3 className="text-lg font-semibold mb-1">Call Us</h3>
                       <p className="text-zinc-400 mb-2">Monday to Friday, 9am to 6pm</p>
                       <a href="tel:+18005551234" className="text-amber-500 hover:text-amber-400">
-                        +1 (800) 555-1234
+                        +1 (515) 882-0790
                       </a>
                     </div>
                   </div>

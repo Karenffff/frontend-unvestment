@@ -371,7 +371,7 @@ export default function InvestPage() {
                   <CardFooter className="flex-col items-stretch">
                     <Button
                       onClick={handleInvest}
-                      disabled={loading || isAmountBelowMinimum}
+                      disabled={loading || !!isAmountBelowMinimum}
                       className={`w-full h-12 ${
                         isAmountBelowMinimum 
                           ? 'bg-red-500/50 hover:bg-red-500/50 cursor-not-allowed' 

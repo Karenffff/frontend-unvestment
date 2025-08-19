@@ -116,7 +116,7 @@ export default function AboutPage() {
                 <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4">
                   <img src="/placeholder.svg?height=96&width=96" alt="CEO" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="text-xl font-bold mb-1">Alex Morgan</h3>
+                <h3 className="text-xl font-bold mb-1">Mark Tygrett</h3>
                 <p className="text-amber-500 mb-4">CEO & Founder</p>
                 <p className="text-zinc-400 mb-4">
                   Former investment banker with 15+ years of experience in cryptocurrency and financial markets.

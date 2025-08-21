@@ -47,7 +47,7 @@ const faqData: FAQItem[] = [
   {
     question: "What is the minimum investment amount?",
     answer:
-      "The minimum investment amount varies by plan. Our Starter Plan has the lowest minimum at 0.01 BTC, while our Freedom Plan requires a minimum of 0.5 BTC. You can view the specific minimum for each plan on our Investment Plans page.",
+      "The minimum investment amount varies by plan. Our Newbie Plan has the lowest minimum at 0.01 BTC, while our Freedom Plan requires a minimum of 0.5 BTC. You can view the specific minimum for each plan on our Investment Plans page.",
     category: "Investments",
   },
   {
@@ -71,7 +71,7 @@ const faqData: FAQItem[] = [
   {
     question: "How do you protect my account?",
     answer:
-      "We implement multiple layers of security to protect your account, including two-factor authentication (2FA), email confirmations for withdrawals, IP address monitoring, and advanced encryption for all sensitive data. We recommend enabling all security features for maximum protection.",
+      "We implement multiple layers of security to protect your account, email confirmations for withdrawals, IP address monitoring, and advanced encryption for all sensitive data. We recommend enabling all security features for maximum protection.",
     category: "Security",
   },
   {
@@ -89,7 +89,7 @@ const faqData: FAQItem[] = [
   {
     question: "How do I withdraw my Bitcoin?",
     answer:
-      "To withdraw Bitcoin, go to the Withdraw page in your dashboard. Enter the amount you wish to withdraw and the Bitcoin address you want to send it to. Depending on your security settings, you may need to confirm the withdrawal via email or 2FA. Withdrawals are typically processed within 24 hours.",
+      "To withdraw Bitcoin, go to the Withdraw page in your dashboard. Enter the amount you wish to withdraw and the Bitcoin address, or cashapp or paypal you want to send it to. Depending on your security settings, you may need to confirm the withdrawal via email or 2FA. Withdrawals are typically processed within 24 hours.",
     category: "Payments",
   },
   {

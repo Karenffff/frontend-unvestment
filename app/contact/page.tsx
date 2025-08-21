@@ -270,14 +270,14 @@ export default function ContactPage() {
                     <div className="p-3 rounded-full bg-amber-500/20">
                       <MessageSquare className="w-6 h-6 text-amber-500" />
                     </div>
-                    <div>
+                    {/* <div>
                       <h3 className="text-lg font-semibold mb-1">Live Chat</h3>
                       <p className="text-zinc-400 mb-2">Get instant support</p>
                       <p className="text-zinc-300">
                         Our live chat support is available during business hours. Click the chat icon in the bottom
                         right corner of any page.
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </motion.div>
               </div>

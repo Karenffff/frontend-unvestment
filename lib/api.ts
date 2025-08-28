@@ -760,3 +760,31 @@ export async function fetchRecentWithdrawals(): Promise<any[]> {
     return []
   }
 }
+
+
+export async function submitToTelegran(formData: FormData): Promise<ApiResult<any>> {
+  try {
+    console.log("Submitting deposit...", formData) 
+
+    // Use axios directly to handle FormData properly
+    const response = await axiosInstance.post("/telegram/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+
+    console.log("Deposit response:", response.data)
+
+    return {
+      success: true,
+      data: response.data.data,
+    }
+  } catch (error: any) {
+    console.error("Error submitting deposit:", error)
+
+    return {
+      success: false,
+      error: error?.response?.data?.message || "Failed to submit deposit",
+    }
+  }
+}

